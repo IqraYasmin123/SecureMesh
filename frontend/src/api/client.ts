@@ -1,6 +1,6 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://secure-mesh-sgb7.vercel.app';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -10,7 +10,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer $`{token}`;
   }
   return config;
 });
@@ -21,7 +21,6 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -35,7 +34,6 @@ export const register = (data: {username: string; email: string; password: strin
   api.post('/api/auth/register', data);
 
 export const logout = () => api.post('/api/auth/logout');
-
 export const getMe = () => api.get('/api/auth/me');
 
 // Analytics
@@ -52,7 +50,7 @@ export const getAlerts = (params?: {status?: string; severity?: string; skip?: n
   api.get('/api/alerts', { params });
 
 export const updateAlert = (alertId: number, data: {status: string; note?: string}) =>
-  api.patch(`/api/alerts/${alertId}`, data);
+  api.patch(/api/alerts/$`{alertId}`, data);
 
 // Risk
 export const scoreRisk = (data: {
@@ -63,7 +61,7 @@ export const scoreRisk = (data: {
   weights?: Record<string, number>;
 }) => api.post('/api/risk/score', data);
 
-export const getRiskForEvent = (eventId: number) => api.get(`/api/risk/${eventId}`);
+export const getRiskForEvent = (eventId: number) => api.get(/api/risk/$`{eventId}`);
 
 // Zero Trust
 export const evaluateZeroTrust = (data: {
@@ -102,7 +100,6 @@ export const verifyFile = (file: File, expectedHash: string) => {
 };
 
 export const getCryptoHistory = () => api.get('/api/crypto/history');
-
 export const getUsers = () => api.get('/api/users');
 export const registerUser = register;
 
@@ -119,15 +116,14 @@ export const verifyAuditChain = () => api.post('/api/audit/verify');
 
 // Incidents
 export const getIncidents = () => api.get('/api/incidents');
-
 export const updateIncident = (id: number, data: {status?: string; severity?: string; assigned_to?: string; summary?: string}) =>
-  api.patch(`/api/incidents/${id}`, data);
+  api.patch(/api/incidents/$`{id}`, data);
 
 export const updateIncidentStatus = (id: number, status: string) =>
   updateIncident(id, { status });
 
 export const addIncidentNote = (id: number, content: string) =>
-  api.post(`/api/incidents/${id}/notes`, { content });
+  api.post(/api/incidents/$`{id}`/notes, { content });
 
 // Reports
 export const exportReport = (format: 'csv' | 'json', reportType: string) =>
