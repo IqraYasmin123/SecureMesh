@@ -1,6 +1,6 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://secure-mesh-sgb7.vercel.app';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -10,7 +10,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
-    config.headers.Authorization = `Bearer $`{token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -50,7 +50,7 @@ export const getAlerts = (params?: {status?: string; severity?: string; skip?: n
   api.get('/api/alerts', { params });
 
 export const updateAlert = (alertId: number, data: {status: string; note?: string}) =>
-  api.patch(/api/alerts/$`{alertId}`, data);
+  api.patch(`/api/alerts/${alertId}`, data);
 
 // Risk
 export const scoreRisk = (data: {
@@ -61,7 +61,7 @@ export const scoreRisk = (data: {
   weights?: Record<string, number>;
 }) => api.post('/api/risk/score', data);
 
-export const getRiskForEvent = (eventId: number) => api.get(/api/risk/$`{eventId}`);
+export const getRiskForEvent = (eventId: number) => api.get(`/api/risk/${eventId}`);
 
 // Zero Trust
 export const evaluateZeroTrust = (data: {
@@ -117,13 +117,13 @@ export const verifyAuditChain = () => api.post('/api/audit/verify');
 // Incidents
 export const getIncidents = () => api.get('/api/incidents');
 export const updateIncident = (id: number, data: {status?: string; severity?: string; assigned_to?: string; summary?: string}) =>
-  api.patch(/api/incidents/$`{id}`, data);
+  api.patch(`/api/incidents/${id}`, data);
 
 export const updateIncidentStatus = (id: number, status: string) =>
   updateIncident(id, { status });
 
 export const addIncidentNote = (id: number, content: string) =>
-  api.post(/api/incidents/$`{id}`/notes, { content });
+  api.post(`/api/incidents/${id}/notes`, { content });
 
 // Reports
 export const exportReport = (format: 'csv' | 'json', reportType: string) =>
@@ -149,3 +149,75 @@ export const resetDemoData = resetDemo;
 export const checkHealth = () => api.get('/api/health');
 
 export default api;
+
+
+// ─── Track 1: Advanced Cryptography (MPC & Shamir's Secret Sharing) ───────────
+
+export interface MPCShare {
+  node_id: number;
+  share_x: number;
+  share_hex: string;
+  commitment_hash: string;
+}
+
+export interface MPCSplitResponse {
+  threshold_k: number;
+  total_shares_n: number;
+  prime_modulus: string;
+  vss_commitments: string[];
+  shares: MPCShare[];
+}
+
+export const splitSecretMPC = (data: { secret: string; threshold_k: number; total_shares_n: number }) =>
+  api.post<MPCSplitResponse>('/api/mpc/split', data);
+
+export const reconstructSecretMPC = (shares: { share_x: number; share_hex: string }[]) =>
+  api.post<{ recovered_secret: string; status: string; interpolation_method: string }>('/api/mpc/reconstruct', { shares });
+
+export const mpcThresholdSign = (data: { message: string; shares: { share_x: number; share_hex: string }[]; threshold_k: number }) =>
+  api.post('/api/mpc/threshold-sign', data);
+
+
+// ─── Track 2: Secure Autonomous AI Agent ──────────────────────────────────────
+
+export interface AgentEvaluationResponse {
+  agent_id: string;
+  timestamp: string;
+  input_digest: string;
+  metrics: {
+    computed_trust_score: number;
+    risk_composite: number;
+    anomaly_score: number;
+    identity_risk: number;
+  };
+  autonomous_decision: {
+    action: string;
+    reason: string;
+    target_asset: string;
+  };
+  cryptographic_action: {
+    data_sealed: boolean;
+    encryption: {
+      ciphertext: string;
+      nonce: string;
+      original_sha256: string;
+      algorithm: string;
+    } | null;
+    mpc_secret_sharing: MPCSplitResponse | null;
+  };
+  verifiable_attestation: {
+    proof_hash: string;
+    signature_scheme: string;
+    verified: boolean;
+  };
+}
+
+export const triggerAutonomousAgent = (data: {
+  severity: string;
+  anomaly_score: number;
+  identity_risk: number;
+  asset_id: string;
+  data?: string;
+}) => api.post<AgentEvaluationResponse>('/api/agent/evaluate', data);
+
+export const getAgentHistory = () => api.get<AgentEvaluationResponse[]>('/api/agent/history');

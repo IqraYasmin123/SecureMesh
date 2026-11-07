@@ -319,3 +319,52 @@ class TestHealthAPI:
         resp = client.get("/api/health")
         assert resp.status_code == 200
         assert resp.json()["status"] == "ok"
+
+
+def test_mpc_shamir_secret_sharing():
+    from mpc_crypto import ShamirSecretSharing, MultiPartyComputationSim
+    sss = ShamirSecretSharing()
+    
+    # (3, 5) Threshold Scheme
+    secret_text = "HACKATHON_TOP_SECRET_SEED_2026"
+    res = sss.split_string(secret_text, threshold_k=3, total_shares_n=5)
+    
+    assert len(res["shares"]) == 5
+    assert res["threshold_k"] == 3
+    
+    # 3 shares can reconstruct
+    subset_3 = res["shares"][:3]
+    recovered = sss.reconstruct_from_hex_shares(subset_3)
+    assert recovered == secret_text
+    
+    # Any other 3 shares can reconstruct
+    subset_other_3 = [res["shares"][0], res["shares"][2], res["shares"][4]]
+    recovered_other = sss.reconstruct_from_hex_shares(subset_other_3)
+    assert recovered_other == secret_text
+    
+    # Multi-Party Threshold Signature simulation
+    mpc = MultiPartyComputationSim(sss)
+    sig_res = mpc.threshold_sign("TEST_AUDIT_TRANSACTION", subset_3, 3)
+    assert sig_res["verified"] is True
+    assert len(sig_res["partial_signatures"]) == 3
+
+
+def test_autonomous_security_agent():
+    from security_agent import mesh_agent
+    
+    # Telemetry with high severity should trigger autonomous encryption and secret sharing
+    payload = {
+        "severity": "CRITICAL",
+        "anomaly_score": 0.92,
+        "identity_risk": 0.84,
+        "asset_id": "CORE_IDENTITY_VAULT",
+        "data": "CONFIDENTIAL_ROOT_TOKEN"
+    }
+    decision = mesh_agent.evaluate_and_respond(payload)
+    
+    assert decision["autonomous_decision"]["action"] == "AUTONOMOUS_LOCKDOWN_AND_ENCRYPT"
+    assert decision["cryptographic_action"]["data_sealed"] is True
+    assert decision["cryptographic_action"]["encryption"]["algorithm"] == "AES-256-GCM"
+    assert decision["cryptographic_action"]["mpc_secret_sharing"]["threshold_k"] == 3
+    assert decision["verifiable_attestation"]["verified"] is True
+    assert len(decision["verifiable_attestation"]["proof_hash"]) == 64

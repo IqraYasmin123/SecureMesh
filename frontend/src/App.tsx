@@ -13,6 +13,8 @@ import IncidentsPage from './pages/Incidents';
 import AuditPage from './pages/Audit';
 import ReportsPage from './pages/Reports';
 import SettingsPage from './pages/Settings';
+import { MPCSecretSharingStudio } from './components/MPCSecretSharingStudio';
+import { AutonomousAgentConsole } from './components/AutonomousAgentConsole';
 import { RoleBadge } from './components/Badges';
 import { Bell, Clock } from 'lucide-react';
 import { getSummary } from './api/client';
@@ -141,6 +143,11 @@ function AppContent() {
           {currentPage === 'risk' && <RiskPage />}
           {currentPage === 'threats' && <ThreatsPage />}
           {currentPage === 'network' && <NetworkPage />}
+          
+          {/* Hackathon Specialized Tracks */}
+          {currentPage === 'mpc' && <MPCSecretSharingStudio />}
+          {currentPage === 'agent' && <AutonomousAgentConsole />}
+
           {currentPage === 'crypto' && <CryptoPage />}
           {currentPage === 'incidents' && <IncidentsPage />}
           {currentPage === 'audit' && <AuditPage />}
