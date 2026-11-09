@@ -222,7 +222,7 @@ export const AutonomousAgentConsole: React.FC = () => {
                   SHA-256 Digest: {latestDecision.verifiable_attestation.proof_hash}
                 </div>
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                  Binds: Agent ID ({latestDecision.agent_id}) + Input Digest + Action State Transition.
+                  Binds: Agent ID ({latestDecision.agent_id}) + Input Digest + Action State Transition. Past evaluations in audit chain: {history.length}.
                 </div>
               </div>
             </div>
